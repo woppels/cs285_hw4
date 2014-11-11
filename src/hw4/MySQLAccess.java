@@ -6,10 +6,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Date;
-
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+
 import javax.xml.bind.DatatypeConverter;
 
 public class MySQLAccess {
@@ -139,6 +139,29 @@ public class MySQLAccess {
 		return fet;
 	}
 	
+	public String fetchOwnerbyID(int id) throws Exception
+	{
+		String owner = "";
+		try {
+			Class.forName("com.mysql.jdbc.Driver");
+			// setup the connection with the DB.
+			connect = DriverManager
+					.getConnection("jdbc:mysql://localhost/feedback?"
+							+ "user=sqluser&password=assword");
+			preparedStatement = connect.prepareStatement("select USER from FEEDBACK.main where id= ? ; ");
+			preparedStatement.setInt(1,id);
+			ResultSet resultSet2 = preparedStatement.executeQuery();
+			resultSet2 = preparedStatement.executeQuery(); 
+			while (resultSet2.next()) {
+				owner = resultSet2.getString("USER");
+			}  
+		} catch (Exception e) {
+			throw e;
+		}
+		
+		return owner; 
+	}
+	
 	public void list(String user) throws Exception
 	{
 		//int u_id = fetchID(user);
@@ -149,18 +172,45 @@ public class MySQLAccess {
 			connect = DriverManager
 					.getConnection("jdbc:mysql://localhost/feedback?"
 							+ "user=sqluser&password=assword");
-			preparedStatement = connect.prepareStatement("select name from FEEDBACK.files; ");
+			preparedStatement = connect.prepareStatement("select name, owner_id from FEEDBACK.files; ");
 			//preparedStatement.setInt(1,u_id);
 			resultSet = preparedStatement.executeQuery(); 
 			int i = 1;
+			System.out.println("\t   File\tOwner");
 			while (resultSet.next()) 
 			{
 				filename = resultSet.getString("name");
-				System.out.println("\t" + i++ + ": " + filename);
+				int o_id = resultSet.getInt("owner_id");
+				//fetchOwnerbyID(o_id);
+				//String owner = fetchOwnerbyID(o_id);
+				System.out.println("\t" + i++ + ": " + filename + "\t" + fetchOwnerbyID(o_id));
 			}  
 		} catch (Exception e) {
 			throw e;
 		}
+	}
+	
+	public boolean exists(String filename) throws Exception
+	{
+		boolean exists = false;
+		try {
+			Class.forName("com.mysql.jdbc.Driver");
+			// setup the connection with the DB.
+			connect = DriverManager
+					.getConnection("jdbc:mysql://localhost/feedback?"
+							+ "user=sqluser&password=assword");
+			preparedStatement = connect.prepareStatement("select name from FEEDBACK.files; ");
+			//preparedStatement.setInt(1,u_id);
+			ResultSet resultSet = preparedStatement.executeQuery(); 
+			while (resultSet.next()) 
+			{
+				String db_file = resultSet.getString("name");
+				if(filename.equals(db_file)) exists = true;
+			}  
+		} catch (Exception e) {
+			throw e;
+		}
+		return exists;
 	}
 	
 	public boolean createFile(String user, String filename, String contents) throws Exception
@@ -174,7 +224,7 @@ public class MySQLAccess {
 			connect = DriverManager
 					.getConnection("jdbc:mysql://localhost/feedback?"
 							+ "user=sqluser&password=assword");
-			preparedStatement = connect
+			PreparedStatement preparedStatement = connect
 					.prepareStatement("insert into FEEDBACK.files values (default, ?, ?, ?, ?, ?)");
 			// id, filename, contents, created, modified, owner_id
 			// 0   1         2         3        4         5
@@ -182,6 +232,10 @@ public class MySQLAccess {
 			java.util.Date today = new java.util.Date();
 			java.sql.Date sqlToday = new java.sql.Date(today.getTime());
 			
+			// Need to check if filename is already in the database
+			if(exists(filename)) return false; 
+			
+			// Otherwise go ahead and add it. 
 			preparedStatement.setString(1, filename);
 			preparedStatement.setString(2, contents);
 			preparedStatement.setDate(3, sqlToday);
@@ -194,6 +248,16 @@ public class MySQLAccess {
 		}
 		
 		return check;
+	}
+	
+	public void modify(String filename) throws Exception
+	{
+		// Need to check if the user trying to modify is the owner or admin
+	}
+	
+	public void delete(String filename) throws Exception
+	{
+		// Need to check if the user trying to delete is the owner, admin 
 	}
 	
 	void writeMetaData(ResultSet resultSet) throws SQLException {
@@ -272,7 +336,7 @@ public class MySQLAccess {
 		System.out.println("2. Login");
 	}
 
-	public void instructions()
+	public void instructions(String logUser) throws Exception
 	{
 		System.out.println("Please enter a number for a command: ");
 		System.out.println("0. Quit");
@@ -281,5 +345,11 @@ public class MySQLAccess {
 		System.out.println("3. Modify file");
 		System.out.println("4. Delete");
 		System.out.println("5. Logout");
+		String role = fetchRole(logUser);
+		if(role.equals("Admin")) {
+			System.out.println("6. Create user."); 
+			System.out.println("7. Delete user.");
+		}
+		
 	}
 } 

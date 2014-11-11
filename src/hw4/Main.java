@@ -8,7 +8,7 @@ public class Main {
   public static void main(String[] args) throws Exception {
     MySQLAccess dao = new MySQLAccess();
     int n;
-    String logUser = "";
+    String logUser = ""; //user that is currently logged in
     boolean login = false;
     dao.instructionsNew();
 	Scanner input = new Scanner(System.in);
@@ -61,7 +61,7 @@ public class Main {
 	}
 	
 	// User now assumed to be logged in
-	dao.instructions();
+	dao.instructions(logUser);
 	Scanner input2 = new Scanner(System.in);
 	while(login && (n = input2.nextInt()) != 0)
 	{
@@ -81,6 +81,7 @@ public class Main {
 			String cont = input2.next();
 			boolean check = dao.createFile(logUser, temp, cont);
 			if(check) System.out.println("File " + temp + " added.");
+			else System.out.println("File " + temp + " already exists, please try again."); 
 		}
 		
 		// Modify file
@@ -90,7 +91,7 @@ public class Main {
 		}
 		// Delete file
 		//n = input2.nextInt();
-		dao.instructions();
+		dao.instructions(logUser);
 	}
 	
 	System.out.println("Logout.");
