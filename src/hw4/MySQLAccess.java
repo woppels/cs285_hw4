@@ -103,12 +103,12 @@ public class MySQLAccess {
 		try {
 			Class.forName("com.mysql.jdbc.Driver");
 			// setup the connection with the DB.
-			connect = DriverManager
+			Connection connect = DriverManager
 					.getConnection("jdbc:mysql://localhost/feedback?"
 							+ "user=sqluser&password=assword");
-			preparedStatement = connect.prepareStatement("select id from FEEDBACK.main where USER= ? ; ");
+			PreparedStatement preparedStatement = connect.prepareStatement("select id from FEEDBACK.main where USER= ? ; ");
 			preparedStatement.setString(1,user);
-			resultSet = preparedStatement.executeQuery(); 
+			ResultSet resultSet = preparedStatement.executeQuery(); 
 			while (resultSet.next()) {
 				fet = resultSet.getInt("id");
 			}  
@@ -250,14 +250,94 @@ public class MySQLAccess {
 		return check;
 	}
 	
-	public void modify(String filename) throws Exception
+	public boolean modify(String user, String filename, String contents) throws Exception
 	{
+		boolean ok = false;
+		if(!exists(filename)) return false;
 		// Need to check if the user trying to modify is the owner or admin
+		try {
+			Class.forName("com.mysql.jdbc.Driver");
+			// setup the connection with the DB.
+			Connection connect = DriverManager
+					.getConnection("jdbc:mysql://localhost/feedback?"
+							+ "user=sqluser&password=assword");
+			PreparedStatement preparedStatement = connect
+					.prepareStatement("select name, owner_id from FEEDBACK.files;");
+			ResultSet rs = preparedStatement.executeQuery();
+			while(rs.next()) {
+				int o_id = rs.getInt("owner_id"); // get file owner's id from file table
+				int file_owner = fetchID(user); // get owner's id from main table
+				
+				//if(!exists(filename)) System.out.println("File " + filename + " does not exist. Please try again");
+				// If the id's match, then the file can be modified or if the user is an admin
+				
+				if(o_id == file_owner || fetchRole(user).equals("Admin"))
+				{
+					Connection update = DriverManager
+							.getConnection("jdbc:mysql://localhost/feedback?"
+									+ "user=sqluser&password=assword");
+					PreparedStatement psUpdate = update.prepareStatement("update files set contents=?, lastmod=? where name=? ;");
+					psUpdate.setString(1, contents);
+					java.util.Date today = new java.util.Date();
+					java.sql.Date sqlToday = new java.sql.Date(today.getTime());
+					psUpdate.setDate(2, sqlToday);
+					psUpdate.setString(3, filename);
+					psUpdate.executeUpdate();
+					ok = true;
+				}
+				else
+				{
+					System.out.println("Sorry, you do not have permission to modify " + filename); 
+				}
+			}
+		} catch (Exception e) {
+			throw e;
+		}
+		
+		return ok; 
 	}
 	
-	public void delete(String filename) throws Exception
+	public boolean delete(String user, String filename) throws Exception
 	{
-		// Need to check if the user trying to delete is the owner, admin 
+		// Need to check if the user trying to delete is the owner, admin, or manager
+		boolean ok = false;
+		if(!exists(filename)) return false;
+		try {
+			Class.forName("com.mysql.jdbc.Driver");
+			// setup the connection with the DB.
+			Connection connect = DriverManager
+					.getConnection("jdbc:mysql://localhost/feedback?"
+							+ "user=sqluser&password=assword");
+			PreparedStatement preparedStatement = connect
+					.prepareStatement("select name, owner_id from FEEDBACK.files;");
+			ResultSet rs = preparedStatement.executeQuery();
+			while(rs.next()) {
+				int o_id = rs.getInt("owner_id"); // get file owner's id from file table
+				int file_owner = fetchID(user); // get owner's id from main table
+				
+				//if(!exists(filename)) System.out.println("File " + filename + " does not exist. Please try again");
+				// If the id's match, then the file can be modified or if the user is an admin
+				String temp = fetchRole(user); 
+				if(o_id == file_owner || temp.equals("Admin") || temp.equals("Manager"))
+				{
+					Connection update = DriverManager
+							.getConnection("jdbc:mysql://localhost/feedback?"
+									+ "user=sqluser&password=assword");
+					PreparedStatement psUpdate = update.prepareStatement("delete from files where name=? ; ");
+					psUpdate.setString(1, filename);
+					psUpdate.executeUpdate();
+					ok = true;
+				}
+				else 
+				{
+					System.out.println("Sorry, you do not have permission to delete " + filename); 
+				}
+			}
+		} catch (Exception e) {
+			throw e;
+		}
+		
+		return ok; 
 	}
 	
 	void writeMetaData(ResultSet resultSet) throws SQLException {
@@ -343,7 +423,7 @@ public class MySQLAccess {
 		System.out.println("1. List files");
 		System.out.println("2. Create new file");
 		System.out.println("3. Modify file");
-		System.out.println("4. Delete");
+		System.out.println("4. Delete a file");
 		System.out.println("5. Logout");
 		String role = fetchRole(logUser);
 		if(role.equals("Admin")) {

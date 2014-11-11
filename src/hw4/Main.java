@@ -87,9 +87,26 @@ public class Main {
 		// Modify file
 		if(n == 3)
 		{
-			
+			Scanner file_name = new Scanner(System.in);
+			System.out.println("Please specify filename:");
+			String file = file_name.next();
+			System.out.println("Please specify new contents");
+			String new_contents = file_name.next();
+			boolean check = dao.modify(logUser, file, new_contents);
+			if(check) System.out.println("File " + file + " modified successfully");
+			else System.out.println("File " + file + " not found, please try again."); 
 		}
+		
 		// Delete file
+		if(n == 4)
+		{
+			Scanner file_name = new Scanner(System.in);
+			System.out.println("Please specify filename:"); 
+			String file = file_name.next();
+			boolean check = dao.delete(logUser, file); 
+			if(check) System.out.println("File " + file + " deleted successfully");
+			else System.out.println("File " + file + " not found, please try again."); 
+		}
 		//n = input2.nextInt();
 		dao.instructions(logUser);
 	}
