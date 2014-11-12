@@ -35,13 +35,12 @@ public class MySQLAccess {
 			// Check password
 			while (resultSet.next()) {
 
-				String userdb = resultSet.getString("USER");
-				if(user.equals("")) { System.out.println("User not found"); }
+				String user2 = resultSet.getString("USER");
+				if(user2.equals("")) { System.out.println("User not found"); }
 
 				String dbpw = resultSet.getString("password");
 				if(!dbpw.equals(password)) { System.out.println("Password incorrect"); check = false;}
 				else { check = true; }
-				//System.out.println("User: " + user);
 			}  
 
 		} catch (Exception e) {
@@ -159,16 +158,14 @@ public class MySQLAccess {
 			{
 				filename = resultSet.getString("name");
 				int o_id = resultSet.getInt("owner_id");
-				//fetchOwnerbyID(o_id);
-				//String owner = fetchOwnerbyID(o_id);
+				String owner = fetchOwnerbyID(o_id);
 				
 				// For more consistent printing
 				if(filename.length() <  5)
 				{
-					System.out.printf(i++ + ": %s\t\t\t%s\n", filename, fetchOwnerbyID(o_id));
+					System.out.printf(i++ + ": %s\t\t\t%s\n", filename, owner);
 				}
-				else System.out.printf(i++ + ": %s\t\t%s\n", filename, fetchOwnerbyID(o_id));
-				//System.out.println("\t" + i++ + ": " + filename + "\t" + fetchOwnerbyID(o_id));
+				else System.out.printf(i++ + ": %s\t\t%s\n", filename, owner);
 			}  
 		} catch (Exception e) {
 			throw e;
@@ -185,7 +182,6 @@ public class MySQLAccess {
 					.getConnection("jdbc:mysql://localhost/feedback?"
 							+ "user=sqluser&password=assword");
 			preparedStatement = connect.prepareStatement("select name from FEEDBACK.files; ");
-			//preparedStatement.setInt(1,u_id);
 			ResultSet resultSet = preparedStatement.executeQuery(); 
 			while (resultSet.next()) 
 			{
@@ -214,8 +210,6 @@ public class MySQLAccess {
 			// id, filename, contents, created, modified, owner_id
 			// 0   1         2         3        4         5
 			// parameters start with 1
-			java.util.Date today = new java.util.Date();
-			java.sql.Date sqlToday = new java.sql.Date(today.getTime());
 			Timestamp timestamp = new Timestamp(new Date().getTime());
 			// Need to check if filename is already in the database
 			if(exists(filename)) return false; 
@@ -269,8 +263,6 @@ public class MySQLAccess {
 			return false; // Can't modify what isn't there. 
 		}
 		
-		
-		
 		// Need to check if the user trying to modify is the owner or admin
 		try {
 			Class.forName("com.mysql.jdbc.Driver");
@@ -293,13 +285,9 @@ public class MySQLAccess {
 					Connection update = DriverManager
 							.getConnection("jdbc:mysql://localhost/feedback?"
 									+ "user=sqluser&password=assword");
-					PreparedStatement psUpdate = update.prepareStatement("update files set contents=?, lastmod=? where name=? ;");
+					PreparedStatement psUpdate = update.prepareStatement("update files set contents=? where name=? ;");
 					psUpdate.setString(1, contents);
-					java.util.Date today = new java.util.Date();
-					java.sql.Date sqlToday = new java.sql.Date(today.getTime());
-					Timestamp timestamp = new Timestamp(new Date().getTime());
-					psUpdate.setTimestamp(2, timestamp);
-					psUpdate.setString(3, filename);
+					psUpdate.setString(2, filename);
 					psUpdate.executeUpdate();
 					ok = true;
 				}
@@ -337,7 +325,6 @@ public class MySQLAccess {
 				int o_id = rs.getInt("owner_id"); // get file owner's id from file table
 				int file_owner = fetchID(user); // get owner's id from main table
 				
-				//if(!exists(filename)) System.out.println("File " + filename + " does not exist. Please try again");
 				// If the id's match, then the file can be modified or if the user is an admin
 				String temp = fetchRole(user); 
 				if(o_id == file_owner || temp.equals("Admin") || temp.equals("Manager"))
@@ -378,7 +365,6 @@ public class MySQLAccess {
 			resultSet = preparedStatement.executeQuery(); 
 
 			// Check password 
-
 			String dbpw = resultSet.getString("password");
 			if(!dbpw.equals(password)) { System.out.println("Password incorrect: " + dbpw); return check;}
 

@@ -13,7 +13,6 @@ public class Main {
     dao.instructionsNew();
 	Scanner input = new Scanner(System.in);
 
-	//while((n = input.nextInt()) != 0)
 	while(!login)
 	{
 		n = input.nextInt();
@@ -21,9 +20,7 @@ public class Main {
 		if(n == 2)
 		{
 			System.out.println("Username: ");
-			//Scanner user = new Scanner(System.in);
 			String temp = input.next(); 
-			//System.out.println(temp);
 			System.out.println("Password:"); 
 			String password; 
 			while(input.hasNext())
@@ -41,7 +38,7 @@ public class Main {
 					break;
 				}
 			}
-		} // n == 2
+		} 
 		
 		// Create account
 		if(n == 1)
@@ -62,7 +59,6 @@ public class Main {
 	
 	// User now assumed to be logged in
 	dao.instructions(logUser);
-	//Scanner input2 = new Scanner(System.in);
 	while(login && (n = input.nextInt()) != 0)
 	{
 		// List files
@@ -104,7 +100,6 @@ public class Main {
 		// Delete file
 		if(n == 5)
 		{
-			//Scanner file_name = new Scanner(System.in);
 			System.out.println("Please specify filename:"); 
 			String file = input.next();
 			boolean check = dao.delete(logUser, file); 
