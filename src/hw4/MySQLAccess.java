@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
 import java.util.Date;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
@@ -152,14 +153,22 @@ public class MySQLAccess {
 			//preparedStatement.setInt(1,u_id);
 			resultSet = preparedStatement.executeQuery(); 
 			int i = 1;
-			System.out.println("\t   File\tOwner");
+			//System.out.println("\t   File\t\tOwner");
+			System.out.printf("File\t\t\tOwner\n");
 			while (resultSet.next()) 
 			{
 				filename = resultSet.getString("name");
 				int o_id = resultSet.getInt("owner_id");
 				//fetchOwnerbyID(o_id);
 				//String owner = fetchOwnerbyID(o_id);
-				System.out.println("\t" + i++ + ": " + filename + "\t" + fetchOwnerbyID(o_id));
+				
+				// For more consistent printing
+				if(filename.length() <  5)
+				{
+					System.out.printf(i++ + ": %s\t\t\t%s\n", filename, fetchOwnerbyID(o_id));
+				}
+				else System.out.printf(i++ + ": %s\t\t%s\n", filename, fetchOwnerbyID(o_id));
+				//System.out.println("\t" + i++ + ": " + filename + "\t" + fetchOwnerbyID(o_id));
 			}  
 		} catch (Exception e) {
 			throw e;
@@ -207,15 +216,15 @@ public class MySQLAccess {
 			// parameters start with 1
 			java.util.Date today = new java.util.Date();
 			java.sql.Date sqlToday = new java.sql.Date(today.getTime());
-			
+			Timestamp timestamp = new Timestamp(new Date().getTime());
 			// Need to check if filename is already in the database
 			if(exists(filename)) return false; 
 			
 			// Otherwise go ahead and add it. 
 			preparedStatement.setString(1, filename);
 			preparedStatement.setString(2, contents);
-			preparedStatement.setDate(3, sqlToday);
-			preparedStatement.setDate(4, sqlToday);
+			preparedStatement.setTimestamp(3, timestamp);
+			preparedStatement.setTimestamp(4, timestamp);
 			preparedStatement.setInt(5, u_id);
 			preparedStatement.executeUpdate();
 			check = true;
@@ -240,8 +249,11 @@ public class MySQLAccess {
 			ResultSet rs = preparedStatement.executeQuery();
 
 			while(rs.next()) {
+				System.out.println("------------------------------------------------");
+				System.out.println("***** Current Contents of " + filename + " *****");
 				String old_contents = rs.getString("contents");
 				System.out.println(old_contents);
+				System.out.println("------------------------------------------------");
 			}
 		} catch (Exception e) {
 			throw e;
@@ -256,6 +268,8 @@ public class MySQLAccess {
 			System.out.println("File does not exist, please try again.");
 			return false; // Can't modify what isn't there. 
 		}
+		
+		
 		
 		// Need to check if the user trying to modify is the owner or admin
 		try {
@@ -272,15 +286,10 @@ public class MySQLAccess {
 			while(rs.next()) {
 				int o_id = rs.getInt("owner_id"); // get file owner's id from file table
 				int file_owner = fetchID(user); // get owner's id from main table
-				String old_contents = rs.getString("contents");
 				
-				//if(!exists(filename)) System.out.println("File " + filename + " does not exist. Please try again");
-				// If the id's match, then the file can be modified or if the user is an admin
-				
+				// If the id's match, then the file can be modified or if the user is an admin				
 				if(o_id == file_owner || fetchRole(user).equals("Admin"))
 				{
-					System.out.println("Old contents:"); 
-					System.out.println(old_contents);
 					Connection update = DriverManager
 							.getConnection("jdbc:mysql://localhost/feedback?"
 									+ "user=sqluser&password=assword");
@@ -288,7 +297,8 @@ public class MySQLAccess {
 					psUpdate.setString(1, contents);
 					java.util.Date today = new java.util.Date();
 					java.sql.Date sqlToday = new java.sql.Date(today.getTime());
-					psUpdate.setDate(2, sqlToday);
+					Timestamp timestamp = new Timestamp(new Date().getTime());
+					psUpdate.setTimestamp(2, timestamp);
 					psUpdate.setString(3, filename);
 					psUpdate.executeUpdate();
 					ok = true;

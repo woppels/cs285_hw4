@@ -21,14 +21,14 @@ public class Main {
 		if(n == 2)
 		{
 			System.out.println("Username: ");
-			Scanner user = new Scanner(System.in);
-			String temp = user.next(); 
+			//Scanner user = new Scanner(System.in);
+			String temp = input.next(); 
 			//System.out.println(temp);
 			System.out.println("Password:"); 
 			String password; 
-			while(user.hasNext())
+			while(input.hasNext())
 			{
-				password = user.next();
+				password = input.next();
 				if(!dao.login(temp,password)) 
 				{
 					System.out.println("Try again");
@@ -47,10 +47,10 @@ public class Main {
 		if(n == 1)
 		{
 			System.out.println("Please enter your username: ");
-			Scanner newUser = new Scanner(System.in);
-			String temp = newUser.next();
+			//Scanner newUser = new Scanner(System.in);
+			String temp = input.next();
 			System.out.println("Please enter your password: ");
-			String pw = newUser.next();
+			String pw = input.next();
 			// Not trying to make it robust, will assume password correct on first try
 			boolean add = dao.addUser(temp, pw);
 			if(!add) { System.out.println("User not added, something went wrong"); }
@@ -62,8 +62,8 @@ public class Main {
 	
 	// User now assumed to be logged in
 	dao.instructions(logUser);
-	Scanner input2 = new Scanner(System.in);
-	while(login && (n = input2.nextInt()) != 0)
+	//Scanner input2 = new Scanner(System.in);
+	while(login && (n = input.nextInt()) != 0)
 	{
 		// List files
 		if(n == 1)
@@ -76,9 +76,9 @@ public class Main {
 		if(n == 3)
 		{
 			System.out.println("Filename:");
-			String temp = input2.next();input2.nextLine();
+			String temp = input.next();input.nextLine();
 			System.out.println("Contents: ");
-			String cont = input2.nextLine();
+			String cont = input.nextLine();
 			boolean check = dao.createFile(logUser, temp, cont);
 			if(check) System.out.println("File " + temp + " added.");
 			else System.out.println("File " + temp + " already exists, please try again."); 
@@ -88,16 +88,14 @@ public class Main {
 		if(n == 4)
 		{
 			System.out.println("Please specify filename:");
-			String file = input2.next(); input2.nextLine(); 
+			String file = input.next(); input.nextLine(); 
 			if(dao.exists(file)) { 
-				System.out.println("Old contents");
 				dao.printContents(file);
-				System.out.println("-----------");
 			}
 			else { System.out.println("File not found, please try again"); dao.instructions(logUser); continue; }
 			
 			System.out.println("Please specify new contents:");
-			String new_contents = input2.nextLine();
+			String new_contents = input.nextLine();
 			boolean check = dao.modify(logUser, file, new_contents);
 			if(check) System.out.println("File " + file + " modified successfully");
 			
@@ -106,9 +104,9 @@ public class Main {
 		// Delete file
 		if(n == 5)
 		{
-			Scanner file_name = new Scanner(System.in);
+			//Scanner file_name = new Scanner(System.in);
 			System.out.println("Please specify filename:"); 
-			String file = file_name.next();
+			String file = input.next();
 			boolean check = dao.delete(logUser, file); 
 			if(check) System.out.println("File " + file + " deleted successfully");
 		}
@@ -117,11 +115,9 @@ public class Main {
 		if(n == 2)
 		{
 			System.out.println("Please specify filename:");
-			String file = input2.next();
+			String file = input.next();
 			if(dao.exists(file)) { 
-				System.out.println("Contents of " + file);
 				dao.printContents(file);
-				System.out.println("-----------");
 			}
 			else { System.out.println("File not found, please try again"); continue; }
 		}
@@ -131,9 +127,9 @@ public class Main {
 		{
 			// Make sure the only admin can use this
 			System.out.println("Please specify new user:");
-			String newUser = input2.next();
+			String newUser = input.next();
 			System.out.println("Please enter their temporary password:"); 
-			String newPass = input2.next();
+			String newPass = input.next();
 			boolean success = dao.addUser(newUser, newPass);
 			if(success) System.out.println("New user " + newUser + " added."); 
 		}
@@ -143,7 +139,7 @@ public class Main {
 		{
 			// Make sure the only admin can use this
 			System.out.println("Please specify user to delete:");
-			String delete = input2.next();
+			String delete = input.next();
 			if(delete.equals(logUser)) { 
 				System.out.println("You cannot delete yourself."); 
 				dao.instructions(logUser); 
