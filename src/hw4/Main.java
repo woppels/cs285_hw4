@@ -94,7 +94,7 @@ public class Main {
 				dao.printContents(file);
 				System.out.println("-----------");
 			}
-			else { System.out.println("File not found, please try again"); continue; }
+			else { System.out.println("File not found, please try again"); dao.instructions(logUser); continue; }
 			
 			System.out.println("Please specify new contents:");
 			String new_contents = input2.nextLine();
@@ -145,14 +145,13 @@ public class Main {
 			System.out.println("Please specify user to delete:");
 			String delete = input2.next();
 			if(delete.equals(logUser)) { 
-				System.out.println("You cannot delete yourself. Only a super admin can."); 
+				System.out.println("You cannot delete yourself."); 
 				dao.instructions(logUser); 
 				continue;
 			}
 			boolean success = dao.deleteUser(delete);
 			if(success) System.out.println("User " + delete + " deleted."); 
 		}
-		
 		dao.instructions(logUser);
 	}
 	
