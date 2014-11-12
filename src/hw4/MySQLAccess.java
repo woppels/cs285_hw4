@@ -73,30 +73,6 @@ public class MySQLAccess {
 		return added;
 	}
 
-	public void readDataBase() throws Exception {
-		try {
-			// this will load the MySQL driver, each DB has its own driver
-			Class.forName("com.mysql.jdbc.Driver");
-			// setup the connection with the DB.
-			connect = DriverManager
-					.getConnection("jdbc:mysql://localhost/feedback?"
-							+ "user=sqluser&password=assword");
-
-			String test = getPasswordHash("Testpass");
-
-			preparedStatement = connect.prepareStatement("select USER, password from FEEDBACK.main where USER= ? ; ");
-			preparedStatement.setString(1,"Test2");
-			resultSet = preparedStatement.executeQuery(); 
-			writeResultSet(resultSet);
-
-
-		} catch (Exception e) {
-			throw e;
-		} finally {
-			//close();
-		}
-	}
-
 	public int fetchID(String user) throws Exception
 	{
 		int fet = 0;
@@ -276,7 +252,10 @@ public class MySQLAccess {
 	public boolean modify(String user, String filename, String contents) throws Exception
 	{
 		boolean ok = false;
-		if(!exists(filename)) return false; // Can't modify what isn't there. 
+		if(!exists(filename)) {
+			System.out.println("File does not exist, please try again.");
+			return false; // Can't modify what isn't there. 
+		}
 		
 		// Need to check if the user trying to modify is the owner or admin
 		try {
@@ -331,7 +310,10 @@ public class MySQLAccess {
 	{
 		// Need to check if the user trying to delete is the owner, admin, or manager
 		boolean ok = false;
-		if(!exists(filename)) return false;
+		if(!exists(filename)) {
+			System.out.println("File does not exist, please try again.");
+			return false; // Can't modify what isn't there. 
+		}
 		try {
 			Class.forName("com.mysql.jdbc.Driver");
 			// setup the connection with the DB.
@@ -371,48 +353,6 @@ public class MySQLAccess {
 		return ok; 
 	}
 	
-	void writeMetaData(ResultSet resultSet) throws SQLException {
-		// now get some metadata from the database
-		System.out.println("The columns in the table are: ");
-		System.out.println("Table: " + resultSet.getMetaData().getTableName(1));
-		for  (int i = 1; i<= resultSet.getMetaData().getColumnCount(); i++){
-			System.out.println("Column " +i  + " "+ resultSet.getMetaData().getColumnName(i));
-		}
-	}
-
-	private void writeResultSet(ResultSet resultSet) throws SQLException {
-		// resultSet is initialised before the first data set
-		while (resultSet.next()) {
-			// it is possible to get the columns via name
-			// also possible to get the columns via the column number
-			// which starts at 1
-			// e.g., resultSet.getString(2);
-			String user = resultSet.getString("USER"); 
-			//String website = resultSet.getString("ROLE");
-			//String summary = resultSet.getString("OWNED");
-			String password = resultSet.getString("password");
-
-			String userdb = resultSet.getString("USER");
-			if(user.equals("")) { System.out.println("User not found"); }
-
-			String dbpw = "hello";
-			if(!dbpw.equals(password)) { System.out.println("Password incorrect"); }
-
-			System.out.println("User: " + user);
-			//System.out.println("Website: " + website);
-			//System.out.println("Summary: " + summary);
-
-		}
-	}
-
-	private static String getPasswordHash(String password)
-			throws NoSuchAlgorithmException, UnsupportedEncodingException {
-		MessageDigest digest = MessageDigest.getInstance("SHA-1");
-		digest.reset();
-		byte[] hash = digest.digest(password.getBytes("UTF-8"));
-		return DatatypeConverter.printHexBinary(hash);
-	}  
-
 	public boolean checkPass(String user, String password) throws Exception
 	{
 		boolean check = false;
@@ -438,6 +378,28 @@ public class MySQLAccess {
 		}
 		return check;
 	}
+	
+	boolean deleteUser(String user) throws Exception 
+	{
+		boolean check = false;
+		try {
+			Class.forName("com.mysql.jdbc.Driver");
+			// setup the connection with the DB.
+			connect = DriverManager
+					.getConnection("jdbc:mysql://localhost/feedback?"
+							+ "user=sqluser&password=assword");
+			preparedStatement = connect.prepareStatement("delete from FEEDBACK.main where user=? ; ");
+			preparedStatement.setString(1,user);
+			String role = fetchRole(user); 
+			if(role.equals("Admin")) { System.out.println("You cannot have ultimate power."); return false; }
+			preparedStatement.executeUpdate(); 
+
+		} catch (Exception e) {
+			throw e;
+		}
+		return check;
+	}
+
 
 	public void instructionsNew()
 	{

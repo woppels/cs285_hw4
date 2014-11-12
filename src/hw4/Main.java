@@ -126,8 +126,32 @@ public class Main {
 			else { System.out.println("File not found, please try again"); continue; }
 		}
 		// Admin create user
+		boolean isAdmin = dao.fetchRole(logUser).equals("Admin"); 
+		if(n == 6 && isAdmin)
+		{
+			// Make sure the only admin can use this
+			System.out.println("Please specify new user:");
+			String newUser = input2.next();
+			System.out.println("Please enter their temporary password:"); 
+			String newPass = input2.next();
+			boolean success = dao.addUser(newUser, newPass);
+			if(success) System.out.println("New user " + newUser + " added."); 
+		}
 		
 		// Admin delete user
+		if(n == 7 && isAdmin)
+		{
+			// Make sure the only admin can use this
+			System.out.println("Please specify user to delete:");
+			String delete = input2.next();
+			if(delete.equals(logUser)) { 
+				System.out.println("You cannot delete yourself. Only a super admin can."); 
+				dao.instructions(logUser); 
+				continue;
+			}
+			boolean success = dao.deleteUser(delete);
+			if(success) System.out.println("User " + delete + " deleted."); 
+		}
 		
 		dao.instructions(logUser);
 	}
