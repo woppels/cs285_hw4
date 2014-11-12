@@ -69,7 +69,7 @@ public class MySQLAccess {
 		} catch (Exception e) {
 			throw e;
 		}
-		
+
 		return added;
 	}
 
@@ -91,9 +91,10 @@ public class MySQLAccess {
 		} catch (Exception e) {
 			throw e;
 		}
+		
 		return fet;
 	}
-	
+
 	public String fetchRole(String user) throws Exception
 	{
 		String fet = "Employee";
@@ -112,9 +113,10 @@ public class MySQLAccess {
 		} catch (Exception e) {
 			throw e;
 		}
+		
 		return fet;
 	}
-	
+
 	public String fetchOwnerbyID(int id) throws Exception
 	{
 		String owner = "";
@@ -134,10 +136,10 @@ public class MySQLAccess {
 		} catch (Exception e) {
 			throw e;
 		}
-		
+
 		return owner; 
 	}
-	
+
 	public void list() throws Exception
 	{
 		//int u_id = fetchID(user);
@@ -159,7 +161,7 @@ public class MySQLAccess {
 				filename = resultSet.getString("name");
 				int o_id = resultSet.getInt("owner_id");
 				String owner = fetchOwnerbyID(o_id);
-				
+
 				// For more consistent printing
 				if(filename.length() <  5)
 				{
@@ -171,7 +173,7 @@ public class MySQLAccess {
 			throw e;
 		}
 	}
-	
+
 	public boolean exists(String filename) throws Exception
 	{
 		boolean exists = false;
@@ -191,15 +193,16 @@ public class MySQLAccess {
 		} catch (Exception e) {
 			throw e;
 		}
+		
 		return exists;
 	}
-	
+
 	public boolean createFile(String user, String filename, String contents) throws Exception
 	{	
 		boolean check = false;
 		try {
 			int u_id = fetchID(user);
-			
+
 			Class.forName("com.mysql.jdbc.Driver");
 			// setup the connection with the DB.
 			connect = DriverManager
@@ -213,7 +216,7 @@ public class MySQLAccess {
 			Timestamp timestamp = new Timestamp(new Date().getTime());
 			// Need to check if filename is already in the database
 			if(exists(filename)) return false; 
-			
+
 			// Otherwise go ahead and add it. 
 			preparedStatement.setString(1, filename);
 			preparedStatement.setString(2, contents);
@@ -225,10 +228,10 @@ public class MySQLAccess {
 		} catch (Exception e) {
 			throw e;
 		}
-		
+
 		return check;
 	}
-	
+
 	public void printContents(String filename) throws Exception
 	{
 		try {
@@ -252,9 +255,8 @@ public class MySQLAccess {
 		} catch (Exception e) {
 			throw e;
 		}
-		
 	}
-	
+
 	public boolean modify(String user, String filename, String contents) throws Exception
 	{
 		boolean ok = false;
@@ -262,7 +264,7 @@ public class MySQLAccess {
 			System.out.println("File does not exist, please try again.");
 			return false; // Can't modify what isn't there. 
 		}
-		
+
 		// Need to check if the user trying to modify is the owner or admin
 		try {
 			Class.forName("com.mysql.jdbc.Driver");
@@ -274,11 +276,11 @@ public class MySQLAccess {
 					.prepareStatement("select name, owner_id, contents from FEEDBACK.files where name=?;");
 			preparedStatement.setString(1,filename);
 			ResultSet rs = preparedStatement.executeQuery();
-			
+
 			while(rs.next()) {
 				int o_id = rs.getInt("owner_id"); // get file owner's id from file table
 				int file_owner = fetchID(user); // get owner's id from main table
-				
+
 				// If the id's match, then the file can be modified or if the user is an admin				
 				if(o_id == file_owner || fetchRole(user).equals("Admin"))
 				{
@@ -300,10 +302,10 @@ public class MySQLAccess {
 		} catch (Exception e) {
 			throw e;
 		}
-		
+
 		return ok; 
 	}
-	
+
 	public boolean delete(String user, String filename) throws Exception
 	{
 		// Need to check if the user trying to delete is the owner, admin, or manager
@@ -324,7 +326,7 @@ public class MySQLAccess {
 			while(rs.next()) {
 				int o_id = rs.getInt("owner_id"); // get file owner's id from file table
 				int file_owner = fetchID(user); // get owner's id from main table
-				
+
 				// If the id's match, then the file can be modified or if the user is an admin
 				String temp = fetchRole(user); 
 				if(o_id == file_owner || temp.equals("Admin") || temp.equals("Manager"))
@@ -346,10 +348,10 @@ public class MySQLAccess {
 		} catch (Exception e) {
 			throw e;
 		}
-		
+
 		return ok; 
 	}
-	
+
 	public boolean checkPass(String user, String password) throws Exception
 	{
 		boolean check = false;
@@ -374,7 +376,7 @@ public class MySQLAccess {
 		}
 		return check;
 	}
-	
+
 	boolean deleteUser(String user) throws Exception 
 	{
 		boolean check = false;
@@ -395,7 +397,6 @@ public class MySQLAccess {
 		}
 		return check;
 	}
-
 
 	public void instructionsNew()
 	{
@@ -419,6 +420,5 @@ public class MySQLAccess {
 			System.out.println("6. Create user."); 
 			System.out.println("7. Delete user.");
 		}
-		
 	}
 } 
