@@ -69,45 +69,66 @@ public class Main {
 		if(n == 1)
 		{
 			System.out.println("Listing files..."); 
-			dao.list(logUser);
+			dao.list();
 		}
 		
 		// Create new file
-		if(n == 2)
+		if(n == 3)
 		{
 			System.out.println("Filename:");
-			String temp = input2.next();
+			String temp = input2.next();input2.nextLine();
 			System.out.println("Contents: ");
-			String cont = input2.next();
+			String cont = input2.nextLine();
 			boolean check = dao.createFile(logUser, temp, cont);
 			if(check) System.out.println("File " + temp + " added.");
 			else System.out.println("File " + temp + " already exists, please try again."); 
 		}
 		
 		// Modify file
-		if(n == 3)
+		if(n == 4)
 		{
-			Scanner file_name = new Scanner(System.in);
 			System.out.println("Please specify filename:");
-			String file = file_name.next();
-			System.out.println("Please specify new contents");
-			String new_contents = file_name.next();
+			String file = input2.next(); input2.nextLine(); 
+			if(dao.exists(file)) { 
+				System.out.println("Old contents");
+				dao.printContents(file);
+				System.out.println("-----------");
+			}
+			else { System.out.println("File not found, please try again"); continue; }
+			
+			System.out.println("Please specify new contents:");
+			String new_contents = input2.nextLine();
 			boolean check = dao.modify(logUser, file, new_contents);
 			if(check) System.out.println("File " + file + " modified successfully");
-			else System.out.println("File " + file + " not found, please try again."); 
+			
 		}
 		
 		// Delete file
-		if(n == 4)
+		if(n == 5)
 		{
 			Scanner file_name = new Scanner(System.in);
 			System.out.println("Please specify filename:"); 
 			String file = file_name.next();
 			boolean check = dao.delete(logUser, file); 
 			if(check) System.out.println("File " + file + " deleted successfully");
-			else System.out.println("File " + file + " not found, please try again."); 
 		}
-		//n = input2.nextInt();
+
+		// List file contents
+		if(n == 2)
+		{
+			System.out.println("Please specify filename:");
+			String file = input2.next();
+			if(dao.exists(file)) { 
+				System.out.println("Contents of " + file);
+				dao.printContents(file);
+				System.out.println("-----------");
+			}
+			else { System.out.println("File not found, please try again"); continue; }
+		}
+		// Admin create user
+		
+		// Admin delete user
+		
 		dao.instructions(logUser);
 	}
 	
