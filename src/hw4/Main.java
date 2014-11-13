@@ -21,6 +21,13 @@ public class Main {
 			{
 				System.out.println("Username: ");
 				String temp = input.next(); 
+				if(!dao.userExists(temp)) 
+				{
+					// User doesn't exist
+					System.out.println("User " + temp + " does not exist.");
+					dao.instructionsNew();
+					continue;
+				}
 				System.out.println("Password:"); 
 				String password; 
 				while(input.hasNext())
@@ -129,12 +136,24 @@ public class Main {
 				if(success) System.out.println("New user " + newUser + " added."); 
 			}
 
-			// Admin delete user
 			if(n == 7 && isAdmin)
+			{
+				// list users
+				dao.listUsers();
+			}
+			
+			// Admin delete user
+			if(n == 8 && isAdmin)
 			{
 				// Make sure the only admin can use this
 				System.out.println("Please specify user to delete:");
 				String delete = input.next();
+				if(!dao.userExists(delete))
+				{
+					System.out.println("User " + delete + " does not exist.");
+					dao.instructions(logUser);
+					continue;
+				}
 				if(delete.equals(logUser)) { 
 					System.out.println("You cannot delete yourself."); 
 					dao.instructions(logUser); 
@@ -143,6 +162,7 @@ public class Main {
 				boolean success = dao.deleteUser(delete);
 				if(success) System.out.println("User " + delete + " deleted."); 
 			}
+			
 			dao.instructions(logUser);
 		}
 

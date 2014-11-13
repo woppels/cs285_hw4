@@ -19,19 +19,42 @@ public class MySQLAccess {
 	private PreparedStatement preparedStatement = null;
 	private ResultSet resultSet = null;
 
-	boolean login(String user, String password) throws Exception 
+	public boolean userExists(String user) throws Exception
 	{
 		boolean check = false;
 		try {
 			Class.forName("com.mysql.jdbc.Driver");
 			// setup the connection with the DB.
-			connect = DriverManager
+			Connection connect = DriverManager
 					.getConnection("jdbc:mysql://localhost/feedback?"
 							+ "user=sqluser&password=assword");
-			preparedStatement = connect.prepareStatement("select USER, password from FEEDBACK.main where USER= ? ; ");
+			PreparedStatement preparedStatement = connect.prepareStatement("select USER from FEEDBACK.main where USER= ? ; ");
 			preparedStatement.setString(1,user);
-			resultSet = preparedStatement.executeQuery(); 
-
+			ResultSet resultSet = preparedStatement.executeQuery(); 
+			boolean value = resultSet.next();
+			// Name not in the database.
+			if(value == false) {
+				return false;
+			}
+			check = true;
+		} catch (Exception e) {
+			throw e;
+		}
+			return check;
+	}
+	
+	public boolean login(String user, String password) throws Exception 
+	{
+		boolean check = false;
+		try {
+			Class.forName("com.mysql.jdbc.Driver");
+			// setup the connection with the DB.
+			Connection connect = DriverManager
+					.getConnection("jdbc:mysql://localhost/feedback?"
+							+ "user=sqluser&password=assword");
+			PreparedStatement preparedStatement = connect.prepareStatement("select USER, password from FEEDBACK.main where USER= ? ; ");
+			preparedStatement.setString(1,user);
+			ResultSet resultSet = preparedStatement.executeQuery(); 
 			// Check password
 			while (resultSet.next()) {
 
@@ -55,10 +78,10 @@ public class MySQLAccess {
 		try {
 			Class.forName("com.mysql.jdbc.Driver");
 			// setup the connection with the DB.
-			connect = DriverManager
+			Connection connect = DriverManager
 					.getConnection("jdbc:mysql://localhost/feedback?"
 							+ "user=sqluser&password=assword");
-			preparedStatement = connect
+			PreparedStatement preparedStatement = connect
 					.prepareStatement("insert into FEEDBACK.main values (default, ?, ?, ?)");
 			// parameters start with 1
 			preparedStatement.setString(1, user);
@@ -101,12 +124,12 @@ public class MySQLAccess {
 		try {
 			Class.forName("com.mysql.jdbc.Driver");
 			// setup the connection with the DB.
-			connect = DriverManager
+			Connection connect = DriverManager
 					.getConnection("jdbc:mysql://localhost/feedback?"
 							+ "user=sqluser&password=assword");
-			preparedStatement = connect.prepareStatement("select ROLE from FEEDBACK.main where USER= ? ; ");
+			PreparedStatement preparedStatement = connect.prepareStatement("select ROLE from FEEDBACK.main where USER= ? ; ");
 			preparedStatement.setString(1,user);
-			resultSet = preparedStatement.executeQuery(); 
+			ResultSet resultSet = preparedStatement.executeQuery(); 
 			while (resultSet.next()) {
 				fet = resultSet.getString("ROLE");
 			}  
@@ -123,10 +146,10 @@ public class MySQLAccess {
 		try {
 			Class.forName("com.mysql.jdbc.Driver");
 			// setup the connection with the DB.
-			connect = DriverManager
+			Connection connect = DriverManager
 					.getConnection("jdbc:mysql://localhost/feedback?"
 							+ "user=sqluser&password=assword");
-			preparedStatement = connect.prepareStatement("select USER from FEEDBACK.main where id= ? ; ");
+			PreparedStatement preparedStatement = connect.prepareStatement("select USER from FEEDBACK.main where id= ? ; ");
 			preparedStatement.setInt(1,id);
 			ResultSet resultSet2 = preparedStatement.executeQuery();
 			resultSet2 = preparedStatement.executeQuery(); 
@@ -147,12 +170,12 @@ public class MySQLAccess {
 		try {
 			Class.forName("com.mysql.jdbc.Driver");
 			// setup the connection with the DB.
-			connect = DriverManager
+			Connection connect = DriverManager
 					.getConnection("jdbc:mysql://localhost/feedback?"
 							+ "user=sqluser&password=assword");
-			preparedStatement = connect.prepareStatement("select name, owner_id from FEEDBACK.files; ");
+			PreparedStatement preparedStatement = connect.prepareStatement("select name, owner_id from FEEDBACK.files; ");
 			//preparedStatement.setInt(1,u_id);
-			resultSet = preparedStatement.executeQuery(); 
+			ResultSet resultSet = preparedStatement.executeQuery(); 
 			int i = 1;
 			//System.out.println("\t   File\t\tOwner");
 			System.out.printf("File\t\t\tOwner\n");
@@ -180,10 +203,10 @@ public class MySQLAccess {
 		try {
 			Class.forName("com.mysql.jdbc.Driver");
 			// setup the connection with the DB.
-			connect = DriverManager
+			Connection connect = DriverManager
 					.getConnection("jdbc:mysql://localhost/feedback?"
 							+ "user=sqluser&password=assword");
-			preparedStatement = connect.prepareStatement("select name from FEEDBACK.files; ");
+			PreparedStatement preparedStatement = connect.prepareStatement("select name from FEEDBACK.files; ");
 			ResultSet resultSet = preparedStatement.executeQuery(); 
 			while (resultSet.next()) 
 			{
@@ -205,7 +228,7 @@ public class MySQLAccess {
 
 			Class.forName("com.mysql.jdbc.Driver");
 			// setup the connection with the DB.
-			connect = DriverManager
+			Connection connect = DriverManager
 					.getConnection("jdbc:mysql://localhost/feedback?"
 							+ "user=sqluser&password=assword");
 			PreparedStatement preparedStatement = connect
@@ -358,13 +381,13 @@ public class MySQLAccess {
 		try {
 			Class.forName("com.mysql.jdbc.Driver");
 			// setup the connection with the DB.
-			connect = DriverManager
+			Connection connect = DriverManager
 					.getConnection("jdbc:mysql://localhost/feedback?"
 							+ "user=sqluser&password=assword");
 			statement = connect.createStatement();
-			preparedStatement = connect.prepareStatement("select USER, password from FEEDBACK.main where USER= ? ; ");
+			PreparedStatement preparedStatement = connect.prepareStatement("select USER, password from FEEDBACK.main where USER= ? ; ");
 			preparedStatement.setString(1,user);
-			resultSet = preparedStatement.executeQuery(); 
+			ResultSet resultSet = preparedStatement.executeQuery(); 
 
 			// Check password 
 			String dbpw = resultSet.getString("password");
@@ -377,21 +400,43 @@ public class MySQLAccess {
 		return check;
 	}
 
-	boolean deleteUser(String user) throws Exception 
+	public void listUsers() throws Exception
+	{
+		try {
+			Class.forName("com.mysql.jdbc.Driver");
+			// setup the connection with the DB.
+			Connection connect = DriverManager
+					.getConnection("jdbc:mysql://localhost/feedback?"
+							+ "user=sqluser&password=assword");
+			PreparedStatement preparedStatement = connect.prepareStatement("select USER from FEEDBACK.main; ");
+			ResultSet resultSet = preparedStatement.executeQuery(); 
+			System.out.println("Users:" ); 
+			while(resultSet.next())
+			{
+				System.out.println(resultSet.getString("USER"));
+			}
+
+		} catch (Exception e) {
+			throw e;
+		}
+
+	}
+	
+	public boolean deleteUser(String user) throws Exception 
 	{
 		boolean check = false;
 		try {
 			Class.forName("com.mysql.jdbc.Driver");
 			// setup the connection with the DB.
-			connect = DriverManager
+			Connection connect = DriverManager
 					.getConnection("jdbc:mysql://localhost/feedback?"
 							+ "user=sqluser&password=assword");
-			preparedStatement = connect.prepareStatement("delete from FEEDBACK.main where user=? ; ");
+			PreparedStatement preparedStatement = connect.prepareStatement("delete from FEEDBACK.main where user=? ; ");
 			preparedStatement.setString(1,user);
 			String role = fetchRole(user); 
 			if(role.equals("Admin")) { System.out.println("You cannot have ultimate power."); return false; }
 			preparedStatement.executeUpdate(); 
-
+			check = true;
 		} catch (Exception e) {
 			throw e;
 		}
@@ -418,7 +463,9 @@ public class MySQLAccess {
 		String role = fetchRole(logUser);
 		if(role.equals("Admin")) {
 			System.out.println("6. Create user."); 
-			System.out.println("7. Delete user.");
+			System.out.println("7. List users.");
+			System.out.println("8. Delete user.");
+			
 		}
 	}
 } 
